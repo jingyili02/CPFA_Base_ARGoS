@@ -16,16 +16,16 @@ if __name__ == "__main__":
     files = ['1_19_19_constant_speed/Random_CPFA_r2244_tag8398_81by81.xml']
     run_count = 3
     for file in files:
-        print file 
+        print(file) 
         this_run = Random_Argos("./experiments/"+file)
         count =1
         startTime =time.time()
         for _ in range(run_count):
-            print "Run "+str(count)
+            print(("Run "+str(count)))
 	    singleRun_StartTime =  time.time()
             count = count+1
             output = subprocess.check_output(['argos3 -n -c ' + this_run.argos_xml], shell=True, stderr=subprocess.STDOUT)
 	    singleRun_EndTime = time.time()
-	    print 'This run takes '+str((singleRun_EndTime-singleRun_StartTime)/60.0)+' minutes...' 
+	    print(('This run takes '+str((singleRun_EndTime-singleRun_StartTime)/60.0)+' minutes...' ))
         endTime = time.time()
-        print 'The total running time is '+str((endTime-startTime)/60.0)+' minutes...'
+        print(('The total running time is '+str((endTime-startTime)/60.0)+' minutes...'))
