@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "BaseController_autogen/mocs_compilation.cpp"
+  "BaseController_autogen/timestamp"
   "CMakeFiles/BaseController_autogen"
 )
 

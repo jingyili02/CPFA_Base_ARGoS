@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/jingyili/Study_Info/MS_UTRGV/26Spring/CSCI6371_Robot_program/Final_Proj/CPFA_Base_ARGoS/build/cmake_install.cmake",
+		"/Users/jingyili/Study_Info/MS_UTRGV/26Spring/CSCI6371_Robot_program/Final_Proj/CPFA_Base_ARGoS/build/source/cmake_install.cmake",
+		"/Users/jingyili/Study_Info/MS_UTRGV/26Spring/CSCI6371_Robot_program/Final_Proj/CPFA_Base_ARGoS/build/source/Base/cmake_install.cmake",
+		"/Users/jingyili/Study_Info/MS_UTRGV/26Spring/CSCI6371_Robot_program/Final_Proj/CPFA_Base_ARGoS/build/source/CPFA/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

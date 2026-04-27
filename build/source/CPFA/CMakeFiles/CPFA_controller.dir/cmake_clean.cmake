@@ -8,8 +8,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/CPFA_controller.dir/CPFA_controller_autogen/mocs_compilation.cpp.o.d"
   "CMakeFiles/CPFA_controller.dir/CPFA_loop_functions.cpp.o"
   "CMakeFiles/CPFA_controller.dir/CPFA_loop_functions.cpp.o.d"
+  "CPFA_controller_autogen/mocs_compilation.cpp"
+  "CPFA_controller_autogen/timestamp"
+  "libCPFA_controller.dylib"
   "libCPFA_controller.pdb"
-  "libCPFA_controller.so"
 )
 
 # Per-language clean rules from dependency scanning.

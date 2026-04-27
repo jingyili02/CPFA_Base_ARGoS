@@ -6,8 +6,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/Nest.dir/Nest.cpp.o.d"
   "CMakeFiles/Nest.dir/Nest_autogen/mocs_compilation.cpp.o"
   "CMakeFiles/Nest.dir/Nest_autogen/mocs_compilation.cpp.o.d"
+  "Nest_autogen/mocs_compilation.cpp"
+  "Nest_autogen/timestamp"
+  "libNest.dylib"
   "libNest.pdb"
-  "libNest.so"
 )
 
 # Per-language clean rules from dependency scanning.

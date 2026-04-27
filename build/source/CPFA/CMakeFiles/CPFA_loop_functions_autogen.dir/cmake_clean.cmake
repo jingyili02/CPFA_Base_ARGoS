@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/CPFA_loop_functions_autogen"
   "CPFA_loop_functions_autogen/mocs_compilation.cpp"
+  "CPFA_loop_functions_autogen/timestamp"
 )
 
 # Per-language clean rules from dependency scanning.

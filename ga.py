@@ -274,14 +274,14 @@ if __name__ == "__main__":
     parser.add_argument('-k', '--tests_per_gen', action='store', dest='tests_per_gen', type=int)
     parser.add_argument('-o', '--terminateFlag', action='store', dest='terminateFlag', type=int)
     pop_size = 50
-    gens = 100
+    gens = 150
     elites = 1
     mut_rate = 0.05
     robots = 24  #robots = 16
     tags = 384 #qilu 03/26 for naming the output directory
 
     system = "linux"
-    length = 900 #720 # 12 minutes, length is in second. default length = 3600
+    length = 720 # 12 minutes, length is in second. default length = 3600
     tests_per_gen = 10
     terminateFlag = 0
 
@@ -295,8 +295,9 @@ if __name__ == "__main__":
     #print "time="+str(length/60)+" minutes"
     print("Evaluation=" + str(tests_per_gen))
 
-    #xml_file = raw_input('Choose a file name(e.g. cluster_2_mac.argos)')
-
+    # Pass in param while running "python ga.py -f experiments/Random_CPFA_r24_tag256_10by10.xml"
+    # xml_file = raw_input('Choose a file name(e.g. cluster_2_mac.argos)')
+    
     if args.xml_file:
         xml_file = args.xml_file
         print("The input file: " + xml_file)

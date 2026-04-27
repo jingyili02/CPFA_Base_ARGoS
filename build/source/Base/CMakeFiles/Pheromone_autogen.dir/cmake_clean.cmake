@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Pheromone_autogen"
   "Pheromone_autogen/mocs_compilation.cpp"
+  "Pheromone_autogen/timestamp"
 )
 
 # Per-language clean rules from dependency scanning.
