@@ -13,6 +13,43 @@ import copy
 from lxml import etree
 import logging
 import pdb
+from multiprocessing import Pool
+
+POOL_SIZE = 8
+
+
+def _run_single_test(args):
+    """Module-level wrapper so multiprocessing.Pool can pickle it."""
+    xml_bytes, seed = args
+    argos_xml = etree.fromstring(xml_bytes)
+    argos_util.set_seed(argos_xml, seed)
+    xml_str = etree.tostring(argos_xml)
+    cwd = os.getcwd()
+    # Include PID in prefix so concurrent workers never share a filename.
+    tmpf = tempfile.NamedTemporaryFile(
+        'wb', suffix=".argos",
+        prefix="gatmp_%d_" % os.getpid(),
+        dir=os.path.join(cwd, "experiments"),
+        delete=False,
+    )
+    tmpf.write(xml_str)
+    tmpf.close()
+    argos_args = ["argos3", "-n", "-c", tmpf.name]
+    argos_run = subprocess.Popen(argos_args, stdout=subprocess.PIPE)
+    while argos_run.poll() is None:
+        time.sleep(0.5)
+    if argos_run.returncode != 0:
+        logging.error("Argos failed test")
+        if os.path.exists(tmpf.name):
+            os.unlink(tmpf.name)
+        return 0
+    lines = argos_run.stdout.readlines()
+    if os.path.exists(tmpf.name):
+        os.unlink(tmpf.name)
+    last_line = lines[-1].decode('utf-8')
+    print(last_line)
+    logging.info("partial fitness = %f", float(last_line.strip().split(",")[0]))
+    return float(last_line.strip().split(",")[0])
 
 # http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
 def mkdir_p(path):
@@ -105,17 +142,32 @@ class iAntGA(object):
         self.fitness = np.zeros(self.pop_size) #reset it
         seeds = [np.random.randint(2 ** 32) for _ in range(self.tests_per_gen)]
         logging.info("Seeds for generation: " + str(seeds))
+        # Build parallel task list, preserving the original 3-tier caching logic:
+        #   idx==-1           → all tests_per_gen run fresh
+        #   idx!=-1, count>3  → only first test fresh; remaining re-use prev_fitness
+        #   idx!=-1, count<=3 → all tests re-use prev_fitness
+        tasks = []  # (pop_idx, argos_xml, seed)
         for i, p in enumerate(self.population):
             print("Gen: " + str(self.current_gen) + '; Population: ' + str(i+1))
+            fresh_all   = self.not_evolved_idx[i] == -1
+            fresh_first = (not fresh_all) and self.not_evolved_count[i] > 3
+            if fresh_all or fresh_first:
+                self.not_evolved_count[i] = 0
             for test_id in range(self.tests_per_gen):
                 seed = seeds[test_id]
                 logging.info("pop %d at test %d with seed %d", i, test_id, seed)
-                if self.not_evolved_idx[i] == -1 or self.not_evolved_count[i] > 3:
-                    self.not_evolved_count[i] = 0
-                    self.fitness[i] += self.test_fitness(p, seed)
-                else: #qilu 03/27/2016 avoid recompute
+                if fresh_all or (fresh_first and test_id == 0):
+                    tasks.append((i, p, seed))
+                else:
                     self.fitness[i] += self.prev_fitness[self.not_evolved_idx[i]]
                     logging.info("partial fitness = %d", self.prev_fitness[self.not_evolved_idx[i]])
+
+        if tasks:
+            pool_args = [(etree.tostring(p), seed) for (_, p, seed) in tasks]
+            with Pool(POOL_SIZE) as pool:
+                results = pool.map(_run_single_test, pool_args)
+            for (i, _p, _seed), fitness_val in zip(tasks, results):
+                self.fitness[i] += fitness_val
         # use average fitness as fitness
         for i in range(len(self.fitness)):
             logging.info("pop %d total fitness = %g", i, self.fitness[i])
@@ -125,7 +177,17 @@ class iAntGA(object):
         # sort fitness and population
         #fitpop = sorted(zip(self.fitness, self.population), reverse=True)
         #self.fitness, self.population = map(list, zip(*fitpop))
-        fitpop = sorted(zip(self.fitness, self.population, self.not_evolved_count), reverse=True) #qilu 04/02 add not_evolved_count
+        #fitpop = sorted(zip(self.fitness, self.population, self.not_evolved_count), reverse=True) #qilu 04/02 add not_evolved_count
+        
+        # FIX: Explicitly define sort key to avoid TypeError in Python 3.
+        # When two individuals have identical fitness scores, Python 3 attempts 
+        # to compare the next element in the tuple (the lxml object) to break 
+        # the tie. Since lxml elements are not comparable, this results in 
+        # a TypeError. Using a lambda ensures sorting is based strictly on 
+        # (Fitness, Not_Evolved_Count), bypassing the XML object comparison.
+        fitpop = sorted(zip(self.fitness, self.population, self.not_evolved_count), 
+                        key=lambda x: (x[0], x[2]), 
+                        reverse=True)
         self.fitness, self.population, self.not_evolved_count = list(map(list, list(zip(*fitpop))))
 
         self.save_population(seed)
@@ -137,7 +199,8 @@ class iAntGA(object):
         self.not_evolved_idx = [] #qilu 03/27/2016
         self.not_evolved_count = [] #qilu 04/02/2016
         self.population = []
-        self.check_termination() #qilu 01/21/2016 add this function
+        # Commented out the check termination to make the alg run till 150 gen 
+        #self.check_termination() #qilu 01/21/2016 add this function
         self.population_data = [] # qilu 01/21/2016 reset it
         # Add elites
         for i in range(self.elites):
@@ -277,7 +340,7 @@ if __name__ == "__main__":
     gens = 150
     elites = 1
     mut_rate = 0.05
-    robots = 24  #robots = 16
+    robots = 24  # number of robots
     tags = 384 #qilu 03/26 for naming the output directory
 
     system = "linux"
