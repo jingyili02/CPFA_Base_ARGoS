@@ -134,6 +134,36 @@ class iAntGA(object):
         return float(last_line.strip().split(",")[0])
 
     def run_ga(self):
+        # ───────── MISSION CONFIGURATION VERIFICATION ───────────────────────
+        first_xml = self.population[0]
+        loop_fn   = first_xml.find(".//loop_functions")
+        settings  = loop_fn.find("settings") if loop_fn is not None else None
+
+        nest_radius   = settings.get("NestRadius",           "NOT FOUND") if settings is not None else "NOT FOUND"
+        food_count    = settings.get("FoodItemCount",         "NOT FOUND") if settings is not None else "NOT FOUND"
+        max_sim_time  = settings.get("MaxSimTimeInSeconds",   "NOT FOUND") if settings is not None else "NOT FOUND"
+
+        print("=" * 60)
+        print("       MISSION CONFIGURATION VERIFICATION")
+        print("=" * 60)
+        print(f"  [XML]  NestRadius           : {nest_radius}")
+        print(f"  [XML]  FoodItemCount         : {food_count}")
+        print(f"  [XML]  MaxSimTimeInSeconds   : {max_sim_time}")
+        print("-" * 60)
+        print(f"  [GA]   pop_size (population) : {self.pop_size}")
+        print(f"  [GA]   gens (generations)    : {self.gens}")
+        print(f"  [GA]   tests_per_gen (-k)    : {self.tests_per_gen}")
+        print(f"  [GA]   length (-t, seconds)  : {self.length}")
+        print("=" * 60)
+
+        if nest_radius != "0.15":
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            print("!!  WARNING: NestRadius is '{}', expected '0.15'  !!".format(nest_radius).center(59, " "))
+            print("!!  Check your XML <settings> before continuing!         !!")
+            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print()
+        # ───────── END VERIFICATION ────────────────────────────────────
+
         while self.current_gen <= self.gens and self.terminateFlag == 0:
             self.run_generation()
 
@@ -199,8 +229,7 @@ class iAntGA(object):
         self.not_evolved_idx = [] #qilu 03/27/2016
         self.not_evolved_count = [] #qilu 04/02/2016
         self.population = []
-        # Commented out the check termination to make the alg run till 150 gen 
-        #self.check_termination() #qilu 01/21/2016 add this function
+        self.check_termination() #qilu 01/21/2016 add this function
         self.population_data = [] # qilu 01/21/2016 reset it
         # Add elites
         for i in range(self.elites):
@@ -279,7 +308,8 @@ class iAntGA(object):
         current_fitness_rate = means[7]/npdata[0, 7]
         current_diversity_rate = normalized_stds.max()
         if current_diversity_rate <= diversity_rate and current_fitness_rate >= fitness_convergence_rate:
-            self.terminateFlag = 1
+            # We still need this fynction to check the standard deviation,
+            #self.terminateFlag = 1
             print("Convergent ...")
             print()
         elif current_diversity_rate > diversity_rate and current_fitness_rate < fitness_convergence_rate:
