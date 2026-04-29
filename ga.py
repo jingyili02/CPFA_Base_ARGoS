@@ -15,7 +15,7 @@ import logging
 import pdb
 from multiprocessing import Pool
 
-POOL_SIZE = 8
+POOL_SIZE = 10
 
 
 def _run_single_test(args):
@@ -229,7 +229,7 @@ class iAntGA(object):
         self.not_evolved_idx = [] #qilu 03/27/2016
         self.not_evolved_count = [] #qilu 04/02/2016
         self.population = []
-        self.check_termination() #qilu 01/21/2016 add this function
+        self.check_termination1() #qilu 01/21/2016 add this function
         self.population_data = [] # qilu 01/21/2016 reset it
         # Add elites
         for i in range(self.elites):
@@ -322,6 +322,65 @@ class iAntGA(object):
         else:
             print('Fitness is not convergent ...')
             print('The current rate of mean of fitness is ' + str(current_fitness_rate) + ', which is less than ' + str(fitness_convergence_rate) + ' ...')
+
+    def check_termination1(self):
+        upperBounds = [1.0, 1.0, 2.0, 20.0, 1.0, 20.0, 180.0]
+        data_keys = list(self.population_data[0].keys())
+        data_keys.sort()
+        complete_data = []
+        for data in self.population_data:
+            complete_data.append([float(data[key]) for key in data_keys])
+        npdata = np.array(complete_data)
+
+        # Extract statistical information for the current generation's data.
+        stds = np.delete(npdata.std(axis=0), [7, 8])
+        normalized_stds = stds/upperBounds
+        current_diversity_rate = normalized_stds.max()
+        
+        # Extract the optimal score of the current generation (since the data is already sorted, the first row represents the highest score).
+        current_best = npdata[0, 7]
+
+        # ---------------- Core Custom Stop Logic ----------------
+        # If this is the first run, initialize a list to record the historical high scores.
+        if not hasattr(self, 'best_fitness_history'):
+            self.best_fitness_history = []
+
+        self.best_fitness_history.append(current_best)
+
+        # Set the termination criteria
+        patience = 15        # The number of consecutive generations observed
+        threshold = 0.01     # Increase Threshold (0.01 = 1%; if you want stricter criteria, you can change it to 0.005)
+
+        print(f"[Termination Check] Current Gen Best Fitness: {current_best:.2f}")
+
+        # The improvement rate is calculated only when the historical record exceeds 15 generations.
+        if len(self.best_fitness_history) >= patience + 1:
+            current_historical_best = max(self.best_fitness_history)
+            past_historical_best = max(self.best_fitness_history[:-patience])
+            
+            if abs(past_historical_best) > 1e-6:
+                improvement = (current_historical_best - past_historical_best) / abs(past_historical_best)
+            else:
+                improvement = current_historical_best - past_historical_best               
+
+            print(f"[Termination Check] Improvement over last {patience} gens: {improvement*100:.2f}% (Target: > {threshold*100}%)")
+
+            # If the improvement rate falls below the set threshold, trigger a stop!
+            if current_diversity_rate <= 0.035 and abs(improvement) < threshold:
+                self.terminateFlag = 1
+                print("*" * 60)
+                print(f"*** Early Termination Triggered! ***")
+                print(f"*** Stagnated for {patience} gens with only {improvement*100:.2f}% improvement. ***")
+                print("*" * 60)
+                print()
+                return
+
+        # ---------------- Keep the original print ----------------
+        if current_diversity_rate > 0.035:
+            print('population diversity is high ...')
+            print('The curent standard deviation is ' + str(current_diversity_rate) + ', which is greater than 0.035 ...')
+        else:
+            print('population diversity is low/converged.')
 
     def save_population(self, seed):
         save_dir = self.save_dir

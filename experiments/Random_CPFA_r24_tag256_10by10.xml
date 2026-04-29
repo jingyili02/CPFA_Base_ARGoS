@@ -39,7 +39,7 @@
   <loop_functions label="CPFA_loop_functions" library="build/source/CPFA/libCPFA_loop_functions">
 
     <!-- evolvable parameters -->
-        <CPFA PrintFinalScore="1" ProbabilityOfReturningToNest="0.0147598869881" ProbabilityOfSwitchingToSearching="0.723128706375" RateOfInformedSearchDecay="0.205799848158" RateOfLayingPheromone="14.7027566005" RateOfPheromoneDecay="0.0245057227138" RateOfSiteFidelity="14.1514206414" UninformedSearchVariation="2.81939731297"/>
+        <CPFA PrintFinalScore="1" ProbabilityOfReturningToNest="0.00025671657541720156" ProbabilityOfSwitchingToSearching="0.07072137581802963" RateOfInformedSearchDecay="0.5021814734805375" RateOfLayingPheromone="18.854181678480582" RateOfPheromoneDecay="0.27961957500555323" RateOfSiteFidelity="15.454728959826436" UninformedSearchVariation="0.6978310842681672"/>
 
          <settings ClusterWidthX="8" ClusterWidthY="8" DrawDensityRate="4" DrawIDs="1" 
 	 DrawTargetRays="0" DrawTrails="0" FoodDistribution="0" FoodItemCount="256" 
@@ -136,7 +136,7 @@
   <!-- ****************** -->
 
 
-<!-- <visualization>
+<!--<visualization>
 
 <qt-opengl>
       <camera>

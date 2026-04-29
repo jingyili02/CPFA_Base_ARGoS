@@ -627,7 +627,10 @@ void CPFA_controller::SetHoldingFood() {
 	        	             j = i + 1;
                                      searchingTime+=SimulationTick()-startTime;
                                      startTime = SimulationTick();
-				   //distribute a new food 
+				   /** 
+				   When the robot isHoldingFood = true, it will run the code below immediately.
+				   This block of code trying to generate a random location and put the new location into the resource list, so it actually is generating the new resources.
+					//distribute a new food 
 			         argos::CVector2 placementPosition;
 			         placementPosition.Set(RNG->Uniform(ForageRangeX), RNG->Uniform(ForageRangeY));
 			          
@@ -637,6 +640,7 @@ void CPFA_controller::SetHoldingFood() {
 			         newFoodList.push_back(placementPosition);
 					 newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
                     LoopFunctions->increaseNumDistributedFoodByOne(); //the total number of cubes in the arena should be updated. qilu 11/15/2018
+				   */
 					 //end
                                      break;
 			             } else {
