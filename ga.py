@@ -324,6 +324,13 @@ class iAntGA(object):
             print('The current rate of mean of fitness is ' + str(current_fitness_rate) + ', which is less than ' + str(fitness_convergence_rate) + ' ...')
 
     def check_termination1(self):
+        """
+                Triggers early termination if the historical best fitness has improved
+            by less than `threshold` (1%) over the last `patience` (15) generations.
+            Uses max-over-history and a zero-safe relative improvement formula to
+            stay robust against fitness fluctuation and non-positive fitness values.
+            Diversity is logged for monitoring only.
+        """
         upperBounds = [1.0, 1.0, 2.0, 20.0, 1.0, 20.0, 180.0]
         data_keys = list(self.population_data[0].keys())
         data_keys.sort()
