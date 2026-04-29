@@ -309,7 +309,7 @@ class iAntGA(object):
         current_diversity_rate = normalized_stds.max()
         if current_diversity_rate <= diversity_rate and current_fitness_rate >= fitness_convergence_rate:
             # We still need this fynction to check the standard deviation,
-            #self.terminateFlag = 1
+            self.terminateFlag = 1
             print("Convergent ...")
             print()
         elif current_diversity_rate > diversity_rate and current_fitness_rate < fitness_convergence_rate:
@@ -371,7 +371,7 @@ if __name__ == "__main__":
     elites = 1
     mut_rate = 0.05
     robots = 24  # number of robots
-    tags = 384 #qilu 03/26 for naming the output directory
+    tags = 256 #qilu 03/26 for naming the output directory
 
     system = "linux"
     length = 720 # 12 minutes, length is in second. default length = 3600
