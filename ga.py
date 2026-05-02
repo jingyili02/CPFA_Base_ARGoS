@@ -93,6 +93,7 @@ class iAntGA(object):
         self.not_evolved_count = [0]*self.pop_size #qilu 04/02
         self.prev_not_evolved_count = [0]*self.pop_size #qilu 04/02
         self.prev_fitness = np.zeros(pop_size) #qilu 03/27/2016
+        self.already_logged_convergence = False  # Jingyi LI 05/01/2026
 
         name_and_extension = xml_file.split(".")
         XML_FILE_NAME = name_and_extension[0]
@@ -309,7 +310,7 @@ class iAntGA(object):
         current_diversity_rate = normalized_stds.max()
         if current_diversity_rate <= diversity_rate and current_fitness_rate >= fitness_convergence_rate:
             # We still need this fynction to check the standard deviation,
-            self.terminateFlag = 1
+            #self.terminateFlag = 1
             print("Convergent ...")
             print()
         elif current_diversity_rate > diversity_rate and current_fitness_rate < fitness_convergence_rate:
@@ -374,13 +375,25 @@ class iAntGA(object):
 
             # If the improvement rate falls below the set threshold, trigger a stop!
             if current_diversity_rate <= 0.035 and abs(improvement) < threshold:
-                self.terminateFlag = 1
-                print("*" * 60)
-                print(f"*** Early Termination Triggered! ***")
-                print(f"*** Stagnated for {patience} gens with only {improvement*100:.2f}% improvement. ***")
-                print("*" * 60)
-                print()
-                return
+                if not self.already_logged_convergence:
+                    # Comment out to not let the function stop at the first convergence
+                    #self.terminateFlag = 1
+                    
+                    '''print("*" * 60)
+                    print(f"*** Early Termination Triggered! ***")
+                    print(f"*** Stagnated for {patience} gens with only {improvement*100:.2f}% improvement. ***")
+                    print("*" * 60)
+                    print()'''
+                    print(f"*** [VIRTUAL] Convergence Criteria First Met at Gen {self.current_gen} ***")
+                
+                    log_path = os.path.join(self.save_dir, "convergence_milestone.txt")
+                    with open(log_path, "w") as logf:
+                        logf.write(f"First_Met_Gen: {self.current_gen}\n")
+                        logf.write(f"Best_Fitness: {current_best:.4f}\n")
+                    
+                    self.already_logged_convergence = True
+                    
+                    #return
 
         # ---------------- Keep the original print ----------------
         if current_diversity_rate > 0.035:
